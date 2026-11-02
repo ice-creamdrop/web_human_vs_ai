@@ -322,8 +322,9 @@
             statusEl.style.color = "#059669";
             statusEl.innerText = "🟢 새 판 준비 완료! Spacebar를 누르면 동시 출발합니다";
             
-            // 새 판 준비할 때 AI도 미리 껍데기 로드 상태로 되돌리기
-            resetAndStartAi();
+            // ❌ 기존에 들어있던 resetAndStartAi(); 줄을 삭제했습니다!
+            // 이제 R키를 눌러도 대기 상태만 풀리고, 실제 출발은 Spacebar를 누를 때만 일어납니다.
+            
             if (humanPlayer) humanPlayer.focus();
         }
 
