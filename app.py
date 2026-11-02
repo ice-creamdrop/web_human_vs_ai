@@ -46,14 +46,12 @@ async def control_ws_handler(request):
 
     return ws
 
-# 3. Ruffle AI 게임 물리 통신 소켓 (/ws/game)
+# 3. Ruffle AI 게임 물리 통신 소켓 (/ws/game) - [딜레이 제거 및 실시간 반응형으로 수정]
 async def game_ws_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     
     client_ip = request.remote
-    delay_counter = 0
-    current_action = 0
     buffer = b""
 
     async for msg in ws:
@@ -74,18 +72,16 @@ async def game_ws_handler(request):
                     model_name = user_selected_model.get(client_ip, DEFAULT_MODEL)
                     model = MODELS.get(model_name)
 
-                    if delay_counter <= 0:
-                        if model is not None:
-                            action, _ = model.predict(obs, deterministic=True)
-                            current_action = int(action)
-                        else:
-                            current_action = 0
-                        delay_counter = random.randint(3, 6)
+                    if model is not None:
+                        # [핵심] 학습 환경이 이미 자체 프레임 스킵을 내장하고 있으므로,
+                        # 마스터 모델은 딜레이 없이 deterministic=True로 칼같이 예측해야 100% 성능이 나옵니다!
+                        action, _ = model.predict(obs, deterministic=True)
+                        current_action = int(action)
                     else:
-                        delay_counter -= 1
+                        current_action = 0
 
-                    send_action = current_action if delay_counter >= 3 else 0
-                    await ws.send_bytes(f"{send_action}\x00".encode("utf-8"))
+                    # 즉시 전송
+                    await ws.send_bytes(f"{current_action}\x00".encode("utf-8"))
 
                 except ValueError:
                     pass
