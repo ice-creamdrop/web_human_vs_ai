@@ -76,7 +76,7 @@ async def game_ws_handler(request):
 
                     if delay_counter <= 0:
                         if model is not None:
-                            action, _ = model.predict(obs, deterministic=False)
+                            action, _ = model.predict(obs, deterministic=True)
                             current_action = int(action)
                         else:
                             current_action = 0
