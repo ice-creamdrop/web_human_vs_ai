@@ -333,6 +333,9 @@
         window.addEventListener("DOMContentLoaded", () => {
             connectControlServer();
             const ruffle = window.RufflePlayer.newest();
+            ruffle.config = {
+                splashScreen: false
+            };
 
             humanPlayer = ruffle.createPlayer();
             humanPlayer.style.width = "550px";
