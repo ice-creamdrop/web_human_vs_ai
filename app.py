@@ -10,7 +10,7 @@ MODEL_NAMES = [
     "stork_ai_65536_steps",
     "stork_ai_131072_steps",
     "stork_ai_204800_steps",
-    "ppo_human_300k"
+    "ppo_300k"
 ]
 
 print("📦 AI 체크포인트 모델들을 메모리에 로드 중입니다...")
