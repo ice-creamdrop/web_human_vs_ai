@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
+    <title>황새 오래걷기 : AI vs 인간 맞다이</title>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <style>
+        body {
+            background-color: whitesmoke;
+            color: #1f2937;
+            font-family: 'Malgun Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 15px;
+            user-select: none;
+        }
+        h2 {
+            margin: 5px 0 12px 0;
+            color: #111827;
+        }
+        .control-panel {
+            background: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+        }
+        .control-panel label {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 7px 14px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            color: #4b5563;
+            font-size: 14px;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s;
+        }
+        .control-panel label:hover {
+            background: #e5e7eb;
+        }
+        .control-panel input[type="radio"] {
+            display: none;
+        }
+        .control-panel label:has(input[type="radio"]:checked) {
+            background: #10b981;
+            color: #ffffff;
+            border-color: #059669;
+        }
+        .btn-ready {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn-ready:hover {
+            background: #2563eb;
+        }
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .stage-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .game-box {
+            background: #000;
+            border: 3px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 5px;
+            position: relative;
+            width: 550px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 13px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .badge.ai { color: #f87171; border: 1px solid #f87171; }
+        .badge.human { color: #60a5fa; border: 1px solid #60a5fa; }
+        #ai-wait-msg {
+            color: #facc15;
+            font-size: 16px;
+            font-weight: bold;
+            position: absolute;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .instruction-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            width: 270px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            line-height: 1.6;
+        }
+        .instruction-card h3 {
+            margin: 0 0 12px 0;
+            font-size: 17px;
+            color: #111827;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 8px;
+        }
+        .instruction-card ol {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #374151;
+        }
+        .instruction-card li {
+            margin-bottom: 10px;
+        }
+        .key-tag {
+            display: inline-block;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 13px;
+            color: #111827;
+        }
+        .highlight-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 10px 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🦩 황새 오래걷기 : 강화학습(PPO) AI vs 인간</h2>
+
+    <div class="control-panel">
+        <span style="font-weight: bold;">🤖 AI 난이도:</span>
+        <label>
+            <input type="radio" name="model" value="stork_ai_65536_steps" checked onchange="changeModel(this.value)">
+            <span>초급 (6.5만)</span>
+        </label>
+        <label>
+            <input type="radio" name="model" value="stork_ai_131072_steps" onchange="changeModel(this.value)">
+            <span>중급 (13만)</span>
+        </label>
+        <label>
+            <input type="radio" name="model" value="stork_ai_204800_steps" onchange="changeModel(this.value)">
+            <span>고급 (20만)</span>
+        </label>
+        <label>
+            <input type="radio" name="model" value="ppo_human_300k" onchange="changeModel(this.value)">
+            <span>마스터 (30만)</span>
+        </label>
+
+        <button class="btn-ready" onclick="prepareNextMatch()">🔄 새 판 준비 (R)</button>
+        <span id="status-msg" style="color: #6b7280; font-size: 14px; font-weight: bold;">⏳ AI 서버 연결 중...</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="stage-container">
+            <div class="game-box">
+                <div class="badge ai">⬆️ AI 조종 (PPO 모델)</div>
+                <div id="ai-wait-msg">
+                    ⬇️ 아래 인간 화면에서 <b>Spacebar</b>를 누르면<br>AI도 0m부터 동시에 출발합니다!
+                </div>
+                <div id="ai-swf"></div>
+            </div>
+
+            <div class="game-box">
+                <div class="badge human">⬇️ 인간 조종 (화면 클릭 후 Spacebar로 시작 / 방향키 조작)</div>
+                <div id="human-swf"></div>
+            </div>
+        </div>
+
+        <div class="instruction-card">
+            <h3>🎮 처음 시작 방법</h3>
+            <ol>
+                <li>상단에서 대결할 <b>AI 난이도</b>를 선택합니다.</li>
+                <li>아래쪽 <b>인간 조종 화면</b>을 마우스로 클릭해 시작 메뉴로 들어갑니다.</li>
+                <li>키보드 <span class="key-tag">Space</span>를 누르면 위쪽 AI와 동시에 출발합니다!</li>
+                <li>좌우 방향키(<span class="key-tag">◀</span> <span class="key-tag">▶</span>)로 황새의 균형을 잡으세요.</li>
+            </ol>
+
+            <h3 style="margin-top: 22px; color: #dc2626;">🔄 게임 오버 후 재시작 방법</h3>
+            <ol>
+                <li>게임 오버 화면에서 마우스로 <b>[Try Again]</b> 버튼을 클릭합니다.</li>
+                <li>키보드에서 <span class="key-tag">R</span> 키를 한 번 눌러 <b>'새 판 준비'</b> 상태로 만듭니다.</li>
+                <li>다시 <span class="key-tag">Space</span> 바를 누르면 AI와 0m부터 동시에 재출발합니다!</li>
+            </ol>
+
+            <div class="highlight-box">
+                💡 <b>왜 R키를 누르나요?</b><br>
+                게임 도중 실수로 스페이스바를 건드렸을 때 AI 게임이 혼자 리셋되는 것을 방지하기 위한 안전 잠금장치입니다.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let aiPlayer = null;
+        let humanPlayer = null;
+        let controlSocket = null;
+        let isMatchRunning = false;
+        let reconnectTimer = null;
+
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsBaseUrl = `${wsProtocol}//${window.location.host}`;
+
+        const MODEL_LABELS = {
+            "stork_ai_65536_steps": "초급 (6.5만)",
+            "stork_ai_131072_steps": "중급 (13만)",
+            "stork_ai_204800_steps": "고급 (20만)",
+            "ppo_human_300k": "마스터 (30만)"
+        };
+
+        function connectControlServer() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+
+            controlSocket = new WebSocket(`${wsBaseUrl}/ws/control`);
+            const statusEl = document.getElementById("status-msg");
+
+            controlSocket.onopen = () => {
+                statusEl.style.color = "#059669";
+                statusEl.innerText = "🟢 준비 완료! 아래 창에서 Spacebar를 누르세요";
+                const checkedModel = document.querySelector('input[name="model"]:checked');
+                if (checkedModel) {
+                    controlSocket.send("MODEL:" + checkedModel.value);
+                }
+            };
+
+            controlSocket.onmessage = (event) => {
+                if (event.data.startsWith("LOADED:")) {
+                    const modelName = event.data.split(":")[1];
+                    const friendlyName = MODEL_LABELS[modelName] || modelName;
+                    if (!isMatchRunning) {
+                        statusEl.style.color = "#059669";
+                        statusEl.innerText = `🟢 [${friendlyName}] 준비 완료! Spacebar를 누르세요`;
+                    }
+                }
+            };
+
+            controlSocket.onclose = () => {
+                statusEl.style.color = "#dc2626";
+                statusEl.innerText = "🔄 AI 서버와 재연결 중... (잠시만 기다려주세요)";
+                reconnectTimer = setTimeout(connectControlServer, 2000);
+            };
+
+            controlSocket.onerror = () => {
+                controlSocket.close();
+            };
+        }
+
+        function changeModel(modelName) {
+            if (controlSocket && controlSocket.readyState === WebSocket.OPEN) {
+                controlSocket.send("MODEL:" + modelName);
+            }
+            if (humanPlayer) humanPlayer.focus();
+        }
+
+        function startAiNow() {
+            const waitMsg = document.getElementById("ai-wait-msg");
+            if (waitMsg) waitMsg.style.display = "none";
+
+            const aiContainer = document.getElementById("ai-swf");
+            aiContainer.innerHTML = "";
+
+            const ruffle = window.RufflePlayer.newest();
+            aiPlayer = ruffle.createPlayer();
+            aiPlayer.style.width = "550px";
+            aiPlayer.style.height = "320px";
+            aiContainer.appendChild(aiPlayer);
+
+            aiPlayer.load({
+                url: "stork_ai.swf?t=" + new Date().getTime(),
+                autoplay: "on",
+                unmuteOverlay: "hidden",
+                socketProxy: [
+                    {
+                        host: "127.0.0.1",
+                        port: 9999, // ⚠️ 본인 stork_ai.swf 안의 XMLSocket 포트 번호와 일치시켜주세요!
+                        proxyUrl: `${wsBaseUrl}/ws/game`
+                    }
+                ]
+            });
+        }
+
+        function prepareNextMatch() {
+            isMatchRunning = false;
+            const statusEl = document.getElementById("status-msg");
+            statusEl.style.color = "#059669";
+            statusEl.innerText = "🟢 새 판 준비 완료! Spacebar를 누르면 동시 출발합니다";
+            if (humanPlayer) humanPlayer.focus();
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            connectControlServer();
+            const ruffle = window.RufflePlayer.newest();
+
+            humanPlayer = ruffle.createPlayer();
+            humanPlayer.style.width = "550px";
+            humanPlayer.style.height = "320px";
+            document.getElementById("human-swf").appendChild(humanPlayer);
+            humanPlayer.load({
+                url: "stork_human.swf?t=" + new Date().getTime(),
+                autoplay: "on",
+                unmuteOverlay: "hidden"
+            });
+
+            setTimeout(() => {
+                if (humanPlayer) humanPlayer.focus();
+            }, 500);
+        });
+
+        window.addEventListener("keydown", (e) => {
+            if (!e.isTrusted || e.repeat) return;
+
+            if (e.code === "Space" && !isMatchRunning) {
+                isMatchRunning = true;
+                const statusEl = document.getElementById("status-msg");
+                statusEl.style.color = "#d97706";
+                statusEl.innerText = "🔥 대결 진행중! (재시작: Try Again 클릭 ➔ R키 ➔ Space)";
+
+                if (controlSocket && controlSocket.readyState === WebSocket.OPEN) {
+                    controlSocket.send("RESET");
+                }
+                
+                startAiNow();
+
+                setTimeout(() => {
+                    if (humanPlayer) humanPlayer.focus();
+                }, 30);
+            }
+
+            if (e.code === "KeyR") {
+                prepareNextMatch();
+            }
+        }, true);
+    </script>
+</body>
+</html>
