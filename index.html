@@ -7,8 +7,8 @@
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
     <style>
         body {
-            background-color: whitesmoke;
-            color: #1f2937;
+            background-color: #1e1e2e;
+            color: #ffffff;
             font-family: 'Malgun Gothic', sans-serif;
             display: flex;
             flex-direction: column;
@@ -19,41 +19,35 @@
         }
         h2 {
             margin: 5px 0 12px 0;
-            color: #111827;
         }
         .control-panel {
-            background: #ffffff;
+            background: #2b2b40;
             padding: 12px 20px;
             border-radius: 10px;
             margin-bottom: 15px;
             display: flex;
             gap: 12px;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             flex-wrap: wrap;
         }
         .control-panel label {
             cursor: pointer;
             font-weight: bold;
-            padding: 7px 14px;
+            padding: 7px 12px;
             border-radius: 6px;
-            background: #f3f4f6;
-            color: #4b5563;
+            background: #3b3b54;
             font-size: 14px;
-            border: 1px solid #d1d5db;
-            transition: all 0.2s;
+            transition: background 0.2s;
         }
         .control-panel label:hover {
-            background: #e5e7eb;
+            background: #4b4b6a;
         }
         .control-panel input[type="radio"] {
             display: none;
         }
-        .control-panel label:has(input[type="radio"]:checked) {
-            background: #10b981;
-            color: #ffffff;
-            border-color: #059669;
+        .control-panel input[type="radio"]:checked + span {
+            color: #4ade80;
         }
         .btn-ready {
             background: #3b82f6;
@@ -64,17 +58,9 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
         }
         .btn-ready:hover {
             background: #2563eb;
-        }
-        .main-layout {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            align-items: flex-start;
-            justify-content: center;
         }
         .stage-container {
             display: flex;
@@ -84,8 +70,8 @@
         }
         .game-box {
             background: #000;
-            border: 3px solid #cbd5e1;
-            border-radius: 10px;
+            border: 3px solid #4a4a6a;
+            border-radius: 8px;
             padding: 5px;
             position: relative;
             width: 550px;
@@ -93,12 +79,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
+            top: 10px;
+            left: 10px;
             background: rgba(0, 0, 0, 0.8);
             padding: 5px 12px;
             border-radius: 5px;
@@ -117,117 +102,53 @@
             text-align: center;
             line-height: 1.6;
         }
-        .instruction-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 20px;
-            width: 270px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            line-height: 1.6;
-        }
-        .instruction-card h3 {
-            margin: 0 0 12px 0;
-            font-size: 17px;
-            color: #111827;
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 8px;
-        }
-        .instruction-card ol {
-            margin: 0;
-            padding-left: 20px;
-            font-size: 14px;
-            color: #374151;
-        }
-        .instruction-card li {
-            margin-bottom: 10px;
-        }
-        .key-tag {
-            display: inline-block;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-bottom-width: 2px;
-            border-radius: 4px;
-            padding: 1px 6px;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 13px;
-            color: #111827;
-        }
-        .highlight-box {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 10px 12px;
-            border-radius: 4px;
-            margin-top: 15px;
-            font-size: 13px;
-            color: #1e3a8a;
-        }
     </style>
 </head>
 <body>
 
     <h2>🦩 황새 오래걷기 : 강화학습(PPO) AI vs 인간</h2>
 
+    <!-- 1. 난이도(체크포인트 모델) 선택 및 리셋 패널 -->
     <div class="control-panel">
-        <span style="font-weight: bold;">🤖 AI 난이도:</span>
+        <span>🤖 AI 난이도:</span>
+        
+        <!-- 보유하신 체크포인트 파일 이름에 맞게 value를 수정하세요 -->
         <label>
-            <input type="radio" name="model" value="stork_ai_65536_steps" checked onchange="changeModel(this.value)">
-            <span>초급 (6.5만)</span>
+            <input type="radio" name="model" value="stork_ai_16384_steps" onchange="changeModel(this.value)">
+            <span>초급 (1.6만)</span>
         </label>
         <label>
-            <input type="radio" name="model" value="stork_ai_131072_steps" onchange="changeModel(this.value)">
-            <span>중급 (13만)</span>
+            <input type="radio" name="model" value="stork_ai_32768_steps" checked onchange="changeModel(this.value)">
+            <span>중급 (3.2만)</span>
         </label>
         <label>
-            <input type="radio" name="model" value="stork_ai_204800_steps" onchange="changeModel(this.value)">
-            <span>고급 (20만)</span>
+            <input type="radio" name="model" value="stork_ai_65536_steps" onchange="changeModel(this.value)">
+            <span>고급 (6.5만)</span>
         </label>
         <label>
             <input type="radio" name="model" value="ppo_human_300k" onchange="changeModel(this.value)">
             <span>마스터 (30만)</span>
         </label>
 
-        <button class="btn-ready" onclick="prepareNextMatch()">🔄 새 판 준비 (R)</button>
-        <span id="status-msg" style="color: #6b7280; font-size: 14px; font-weight: bold;">⏳ AI 서버 연결 중...</span>
+        <button class="btn-ready" onclick="prepareNextMatch()">🔄 새 판 준비 (단축키: R)</button>
+        <span id="status-msg" style="color: #4ade80; font-size: 14px; font-weight: bold;">서버 연결 대기중...</span>
     </div>
 
-    <div class="main-layout">
-        <div class="stage-container">
-            <div class="game-box">
-                <div class="badge ai">⬆️ AI 조종 (PPO 모델)</div>
-                <div id="ai-wait-msg">
-                    ⬇️ 아래 인간 화면에서 <b>Spacebar</b>를 누르면<br>AI도 0m부터 동시에 출발합니다!
-                </div>
-                <div id="ai-swf"></div>
+    <!-- 2. 상하단 게임 화면 -->
+    <div class="stage-container">
+        <!-- 위쪽: AI 플레이어 -->
+        <div class="game-box">
+            <div class="badge ai">⬆️ AI 조종 (PPO 모델)</div>
+            <div id="ai-wait-msg">
+                ⬇️ 아래 인간 화면에서 <b>Spacebar</b>를 누르면<br>AI도 0m부터 동시에 출발합니다!
             </div>
-
-            <div class="game-box">
-                <div class="badge human">⬇️ 인간 조종 (화면 클릭 후 Spacebar로 시작 / 방향키 조작)</div>
-                <div id="human-swf"></div>
-            </div>
+            <div id="ai-swf"></div>
         </div>
 
-        <div class="instruction-card">
-            <h3>🎮 처음 시작 방법</h3>
-            <ol>
-                <li>상단에서 대결할 <b>AI 난이도</b>를 선택합니다.</li>
-                <li>아래쪽 <b>인간 조종 화면</b>을 마우스로 클릭해 시작 메뉴로 들어갑니다.</li>
-                <li>키보드 <span class="key-tag">Space</span>를 누르면 위쪽 AI와 동시에 출발합니다!</li>
-                <li>좌우 방향키(<span class="key-tag">◀</span> <span class="key-tag">▶</span>)로 황새의 균형을 잡으세요.</li>
-            </ol>
-
-            <h3 style="margin-top: 22px; color: #dc2626;">🔄 게임 오버 후 재시작 방법</h3>
-            <ol>
-                <li>게임 오버 화면에서 마우스로 <b>[Try Again]</b> 버튼을 클릭합니다.</li>
-                <li>키보드에서 <span class="key-tag">R</span> 키를 한 번 눌러 <b>'새 판 준비'</b> 상태로 만듭니다.</li>
-                <li>다시 <span class="key-tag">Space</span> 바를 누르면 AI와 0m부터 동시에 재출발합니다!</li>
-            </ol>
-
-            <div class="highlight-box">
-                💡 <b>왜 R키를 누르나요?</b><br>
-                게임 도중 실수로 스페이스바를 건드렸을 때 AI 게임이 혼자 리셋되는 것을 방지하기 위한 안전 잠금장치입니다.
-            </div>
+        <!-- 아래쪽: 인간 플레이어 -->
+        <div class="game-box">
+            <div class="badge human">⬇️ 인간 조종 (화면 클릭 후 Spacebar로 시작 / 방향키 조작)</div>
+            <div id="human-swf"></div>
         </div>
     </div>
 
@@ -235,129 +156,82 @@
         let aiPlayer = null;
         let humanPlayer = null;
         let controlSocket = null;
-        let isMatchRunning = false;
-        let reconnectTimer = null;
+        let isMatchRunning = false; // 게임 도중 실수로 Spacebar를 눌러도 리셋되지 않게 막는 잠금 변수
 
-        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsBaseUrl = `${wsProtocol}//${window.location.host}`;
-
-        const MODEL_LABELS = {
-            "stork_ai_65536_steps": "초급 (6.5만)",
-            "stork_ai_131072_steps": "중급 (13만)",
-            "stork_ai_204800_steps": "고급 (20만)",
-            "ppo_human_300k": "마스터 (30만)"
-        };
-
+        // 파이썬 제어 서버(8766) 연결
         function connectControlServer() {
-            if (reconnectTimer) {
-                clearTimeout(reconnectTimer);
-                reconnectTimer = null;
-            }
-
-            controlSocket = new WebSocket(`${wsBaseUrl}/ws/control`);
-            const statusEl = document.getElementById("status-msg");
-
+            controlSocket = new WebSocket("ws://127.0.0.1:8766");
             controlSocket.onopen = () => {
-                statusEl.style.color = "#059669";
-                statusEl.innerText = "🟢 준비 완료! 아래 창에서 Spacebar를 누르세요";
-                const checkedModel = document.querySelector('input[name="model"]:checked');
-                if (checkedModel) {
-                    controlSocket.send("MODEL:" + checkedModel.value);
-                }
+                document.getElementById("status-msg").innerText = "🟢 대기중 (아래 창에서 Spacebar를 누르세요)";
             };
-
             controlSocket.onmessage = (event) => {
                 if (event.data.startsWith("LOADED:")) {
                     const modelName = event.data.split(":")[1];
-                    const friendlyName = MODEL_LABELS[modelName] || modelName;
-                    if (!isMatchRunning) {
-                        statusEl.style.color = "#059669";
-                        statusEl.innerText = `🟢 [${friendlyName}] 준비 완료! Spacebar를 누르세요`;
-                    }
+                    document.getElementById("status-msg").innerText = `🔄 [${modelName}] 적용 완료!`;
                 }
             };
-
             controlSocket.onclose = () => {
-                statusEl.style.color = "#dc2626";
-                statusEl.innerText = "🔄 AI 서버와 재연결 중... (잠시만 기다려주세요)";
-                reconnectTimer = setTimeout(connectControlServer, 2000);
-            };
-
-            controlSocket.onerror = () => {
-                controlSocket.close();
+                document.getElementById("status-msg").innerText = "🔴 파이썬 서버(server.py) 끊김";
             };
         }
 
+        // 라디오 버튼 클릭 시 AI 모델 변경
         function changeModel(modelName) {
             if (controlSocket && controlSocket.readyState === WebSocket.OPEN) {
                 controlSocket.send("MODEL:" + modelName);
             }
+            // 모델 변경 후에도 인간 플레이어 창에 포커스 유지
             if (humanPlayer) humanPlayer.focus();
         }
 
-        // [핵심 변경] 미리 로드된 AI 플레이어를 새로고침(재시작)만 수행하여 로딩 딜레이 0초 달성!
-        function resetAndStartAi() {
+        // 스페이스바를 누르는 순간 위쪽 AI SWF를 새로 로드하여 즉시 출발시키는 함수
+        function startAiNow() {
             const waitMsg = document.getElementById("ai-wait-msg");
             if (waitMsg) waitMsg.style.display = "none";
 
-            if (aiPlayer) {
-                aiPlayer.load({
-                    url: "stork_ai.swf?t=" + new Date().getTime(),
-                    autoplay: "on",
-                    unmuteOverlay: "hidden",
-                    socketProxy: [
-                        {
-                            host: "127.0.0.1",
-                            port: 9999, // ⚠️ 본인 SWF의 소켓 포트 번호와 일치시키세요!
-                            proxyUrl: `${wsBaseUrl}/ws/game`
-                        }
-                    ]
-                });
-            }
-        }
+            const aiContainer = document.getElementById("ai-swf");
+            aiContainer.innerHTML = "";
 
-        function prepareNextMatch() {
-            isMatchRunning = false;
-            const statusEl = document.getElementById("status-msg");
-            statusEl.style.color = "#059669";
-            statusEl.innerText = "🟢 새 판 준비 완료! Spacebar를 누르면 동시 출발합니다";
-            
-            // ❌ 기존에 들어있던 resetAndStartAi(); 줄을 삭제했습니다!
-            // 이제 R키를 눌러도 대기 상태만 풀리고, 실제 출발은 Spacebar를 누를 때만 일어납니다.
-            
-            if (humanPlayer) humanPlayer.focus();
-        }
-
-        // 페이지 켜질 때 AI와 인간 모두 미리 로드 완료해 두기 (로딩 시간 사전 제거!)
-        window.addEventListener("DOMContentLoaded", () => {
-            connectControlServer();
             const ruffle = window.RufflePlayer.newest();
-
-            // 1. 위쪽 AI 플레이어 미리 생성 및 로드
             aiPlayer = ruffle.createPlayer();
             aiPlayer.style.width = "550px";
             aiPlayer.style.height = "320px";
-            document.getElementById("ai-swf").appendChild(aiPlayer);
+            aiContainer.appendChild(aiPlayer);
+
             aiPlayer.load({
-                url: "stork_ai.swf",
+                // ?t=시간 파라미터로 브라우저 캐시를 무시하고 수정된 최신 SWF를 즉시 불러옴
+                url: "stork_ai.swf?t=" + new Date().getTime(),
                 autoplay: "on",
                 unmuteOverlay: "hidden",
                 socketProxy: [
                     {
                         host: "127.0.0.1",
+                        // ⚠️ 중요: 본인의 stork_ai.swf 내부 XMLSocket 포트 번호와 똑같이 맞추세요!
                         port: 9999,
-                        proxyUrl: `${wsBaseUrl}/ws/game`
+                        proxyUrl: "ws://127.0.0.1:8765"
                     }
                 ]
             });
+        }
 
-            // 2. 아래쪽 인간 플레이어 미리 생성 및 로드
+        // 게임 오버 후 다음 판 동시 출발을 위해 잠금을 해제하는 함수
+        function prepareNextMatch() {
+            isMatchRunning = false;
+            document.getElementById("status-msg").innerText = "🟢 새 판 준비 완료! Spacebar를 누르면 동시 출발합니다";
+            if (humanPlayer) humanPlayer.focus();
+        }
+
+        // 페이지 로드 시 인간용 게임 먼저 세팅
+        window.addEventListener("DOMContentLoaded", () => {
+            connectControlServer();
+            const ruffle = window.RufflePlayer.newest();
+
             humanPlayer = ruffle.createPlayer();
             humanPlayer.style.width = "550px";
             humanPlayer.style.height = "320px";
             document.getElementById("human-swf").appendChild(humanPlayer);
             humanPlayer.load({
-                url: "stork_human.swf",
+                url: "stork_human.swf?t=" + new Date().getTime(),
                 autoplay: "on",
                 unmuteOverlay: "hidden"
             });
@@ -367,27 +241,28 @@
             }, 500);
         });
 
+        // 키보드 이벤트 감지 (Spacebar 동시 시작 & R키 재시작 준비)
         window.addEventListener("keydown", (e) => {
             if (!e.isTrusted || e.repeat) return;
 
+            // 1. 대기 상태일 때 Spacebar를 누르면 -> AI 즉시 로드 및 출발 + 잠금 설정
             if (e.code === "Space" && !isMatchRunning) {
                 isMatchRunning = true;
-                const statusEl = document.getElementById("status-msg");
-                statusEl.style.color = "#d97706";
-                statusEl.innerText = "🔥 대결 진행중! (재시작: Try Again 클릭 ➔ R키 ➔ Space)";
+                document.getElementById("status-msg").innerText = "🔥 대결 진행중! (죽은 뒤 새 판 준비는 R키)";
 
                 if (controlSocket && controlSocket.readyState === WebSocket.OPEN) {
                     controlSocket.send("RESET");
                 }
                 
-                // 이미 메모리에 로드되어 있는 AI를 즉시 리셋 재시작 (딜레이 0초!)
-                resetAndStartAi();
+                startAiNow();
 
+                // 포커스가 AI 창으로 뺏기지 않도록 인간 창에 고정
                 setTimeout(() => {
                     if (humanPlayer) humanPlayer.focus();
                 }, 30);
             }
 
+            // 2. 죽고 나서 'R' 키를 누르면 -> 다시 Spacebar로 동시 출발할 수 있도록 잠금 해제
             if (e.code === "KeyR") {
                 prepareNextMatch();
             }
