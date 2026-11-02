@@ -295,31 +295,25 @@
             if (humanPlayer) humanPlayer.focus();
         }
 
-        function startAiNow() {
+        // [핵심 변경] 미리 로드된 AI 플레이어를 새로고침(재시작)만 수행하여 로딩 딜레이 0초 달성!
+        function resetAndStartAi() {
             const waitMsg = document.getElementById("ai-wait-msg");
             if (waitMsg) waitMsg.style.display = "none";
 
-            const aiContainer = document.getElementById("ai-swf");
-            aiContainer.innerHTML = "";
-
-            const ruffle = window.RufflePlayer.newest();
-            aiPlayer = ruffle.createPlayer();
-            aiPlayer.style.width = "550px";
-            aiPlayer.style.height = "320px";
-            aiContainer.appendChild(aiPlayer);
-
-            aiPlayer.load({
-                url: "stork_ai.swf?t=" + new Date().getTime(),
-                autoplay: "on",
-                unmuteOverlay: "hidden",
-                socketProxy: [
-                    {
-                        host: "127.0.0.1",
-                        port: 9999, // ⚠️ 본인 stork_ai.swf 안의 XMLSocket 포트 번호와 일치시켜주세요!
-                        proxyUrl: `${wsBaseUrl}/ws/game`
-                    }
-                ]
-            });
+            if (aiPlayer) {
+                aiPlayer.load({
+                    url: "stork_ai.swf?t=" + new Date().getTime(),
+                    autoplay: "on",
+                    unmuteOverlay: "hidden",
+                    socketProxy: [
+                        {
+                            host: "127.0.0.1",
+                            port: 9999, // ⚠️ 본인 SWF의 소켓 포트 번호와 일치시키세요!
+                            proxyUrl: `${wsBaseUrl}/ws/game`
+                        }
+                    ]
+                });
+            }
         }
 
         function prepareNextMatch() {
@@ -327,19 +321,42 @@
             const statusEl = document.getElementById("status-msg");
             statusEl.style.color = "#059669";
             statusEl.innerText = "🟢 새 판 준비 완료! Spacebar를 누르면 동시 출발합니다";
+            
+            // 새 판 준비할 때 AI도 미리 껍데기 로드 상태로 되돌리기
+            resetAndStartAi();
             if (humanPlayer) humanPlayer.focus();
         }
 
+        // 페이지 켜질 때 AI와 인간 모두 미리 로드 완료해 두기 (로딩 시간 사전 제거!)
         window.addEventListener("DOMContentLoaded", () => {
             connectControlServer();
             const ruffle = window.RufflePlayer.newest();
 
+            // 1. 위쪽 AI 플레이어 미리 생성 및 로드
+            aiPlayer = ruffle.createPlayer();
+            aiPlayer.style.width = "550px";
+            aiPlayer.style.height = "320px";
+            document.getElementById("ai-swf").appendChild(aiPlayer);
+            aiPlayer.load({
+                url: "stork_ai.swf",
+                autoplay: "on",
+                unmuteOverlay: "hidden",
+                socketProxy: [
+                    {
+                        host: "127.0.0.1",
+                        port: 9999,
+                        proxyUrl: `${wsBaseUrl}/ws/game`
+                    }
+                ]
+            });
+
+            // 2. 아래쪽 인간 플레이어 미리 생성 및 로드
             humanPlayer = ruffle.createPlayer();
             humanPlayer.style.width = "550px";
             humanPlayer.style.height = "320px";
             document.getElementById("human-swf").appendChild(humanPlayer);
             humanPlayer.load({
-                url: "stork_human.swf?t=" + new Date().getTime(),
+                url: "stork_human.swf",
                 autoplay: "on",
                 unmuteOverlay: "hidden"
             });
@@ -362,7 +379,8 @@
                     controlSocket.send("RESET");
                 }
                 
-                startAiNow();
+                // 이미 메모리에 로드되어 있는 AI를 즉시 리셋 재시작 (딜레이 0초!)
+                resetAndStartAi();
 
                 setTimeout(() => {
                     if (humanPlayer) humanPlayer.focus();
